@@ -24,12 +24,12 @@ public class EmployeRepositoryTest {
         employe2.setMatricule("M23456");
 
         employeRepository.save(employe1);
-        Employe employe = employeRepository.save(employe2);
+        employeRepository.save(employe2);
 
         //When
         String res = employeRepository.findLastMatricule();
 
         //Then
-        Assertions.assertThat(res).isEqualTo(employe);
+        Assertions.assertThat(res).isEqualTo("23456");
     }
 }
