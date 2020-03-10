@@ -70,7 +70,6 @@ public class EmployeServiceTest {
         NiveauEtude niveauEtude = NiveauEtude.BTS_IUT;
         Double tempsPartiel = 1.0;
         Mockito.when(employeRepository.findLastMatricule()).thenReturn("99999");
-        Mockito.when(employeRepository.findByMatricule("100000")).thenReturn(null);
 
         //When & Then
         Assertions.assertThatThrownBy(() -> {
@@ -86,6 +85,6 @@ public class EmployeServiceTest {
             Assertions.assertThat(e).isInstanceOf(EmployeException.class);
             Assertions.assertThat(e.getMessage()).isEqualTo("Limite des 100000 matricules atteinte !");
         }
-        */
+         */
     }
 }
