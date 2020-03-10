@@ -1,5 +1,6 @@
 package com.ipiecoles.java.java350.model;
 
+import com.ipiecoles.java.java350.exception.EmployeException;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -87,5 +88,37 @@ public class EmployeTest {
 
         // When Then
         Assertions.assertThat(employe.getPrimeAnnuelle()).isEqualTo(prime);
+    }
+
+    @ParameterizedTest(name = "Un salaire de {0}€ augmenté de {1} vaut {2}€")
+    @CsvSource({
+            "1000, 0.1, 1100",
+            "2000, 0.1, 2200",
+            "1000, 0, 1000",
+            "1000, 1, 2000",
+            "0, 1, 0",
+    })
+    public void testAugmenterSalaire(Double salaire, Double pourcentage, Double salaireAugmentée) throws EmployeException {
+        //Given
+        Employe employe = new Employe();
+        employe.setSalaire(salaire);
+
+        //When
+        employe.augmenterSalaire(pourcentage);
+
+        //Then
+        Assertions.assertThat(employe.getSalaire()).isEqualTo(salaireAugmentée);
+    }
+
+    @Test
+    public void testAugmenterSalairePoucentageNegatif() {
+        //Given
+        Employe employe = new Employe();
+        employe.setSalaire(1000.0);
+
+        //When & Then
+        Assertions.assertThatThrownBy(() -> {
+            employe.augmenterSalaire(-0.1);
+        }).isInstanceOf(EmployeException.class).hasMessage("Le pourcentage d'augmentation ne peut pas être négatif !");
     }
 }
