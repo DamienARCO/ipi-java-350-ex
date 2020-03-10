@@ -18,7 +18,6 @@ public class EmployeRepositoryTest {
     EmployeRepository employeRepository;
 
     @BeforeEach
-    @AfterAll
     public void setup() {
         employeRepository.deleteAll();
     }
