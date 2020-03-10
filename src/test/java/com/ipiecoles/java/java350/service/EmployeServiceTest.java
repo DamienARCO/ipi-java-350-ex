@@ -87,4 +87,67 @@ public class EmployeServiceTest {
         }
          */
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "'C12345', 1, 10000, 10000, 1.0, 1",
+            "'C23456', 1, 10000, 10000, 2.0, 1",
+            "'C34567', 2, 10000, 10000, 1.0, 3",
+            "'C45678', 2, 7000, 10000, 10.0, 1",
+            "'C56789', 5, 7000, 10000, 10.0, 1",
+            "'C67890', 2, 9000, 10000, 10.0, 1",
+            "'C09876', 5, 9000, 10000, 10.0, 3",
+            "'C98765', 5, 11000, 10000, 10.0, 6",
+            "'C98765', 5, 13000, 10000, 10.0, 9",
+    })
+    public void testCalculPerformanceCommercial(
+            String matricule, Integer performance, Long caTraite, Long objectifCa,
+            Double performanceMoyenne, Integer performanceCalcule) throws EmployeException {
+        //Given
+        Employe employe = new Employe();
+        employe.setMatricule(matricule);
+        employe.setPerformance(performance);
+        Mockito.when(employeRepository.findByMatricule(matricule)).thenReturn(employe);
+        Mockito.when(
+                employeRepository.avgPerformanceWhereMatriculeStartsWith("C")
+        ).thenReturn(performanceMoyenne);
+
+        //When
+        employeService.calculPerformanceCommercial(matricule, caTraite, objectifCa);
+
+        //Then
+        ArgumentCaptor<Employe> employeCaptor = ArgumentCaptor.forClass(Employe.class);
+        Mockito.verify(employeRepository, Mockito.times(1)).save(employeCaptor.capture());
+        Employe employeAfter = employeCaptor.getValue();
+        Assertions.assertThat(employeAfter.getPerformance()).isEqualTo(performanceCalcule);
+    }
+
+    @Test
+    public void testCalculPerformanceCommercialWithMatriculeNull() throws EmployeException {
+        Assertions.assertThatThrownBy(() -> {
+            employeService.calculPerformanceCommercial(null, 10000l, 10000l);
+        }).isInstanceOf(EmployeException.class).hasMessage("Le matricule ne peut être null et doit commencer par un C !");
+    }
+
+    @Test
+    public void testCalculPerformanceCommercialWithBadMatricule() throws EmployeException {
+        Assertions.assertThatThrownBy(() -> {
+            employeService.calculPerformanceCommercial("T12345", 10000l, 10000l);
+        }).isInstanceOf(EmployeException.class).hasMessage("Le matricule ne peut être null et doit commencer par un C !");
+    }
+
+    @Test
+    public void testCalculPerformanceCommercialWithBadCaTraite() {
+        Assertions.assertThatThrownBy(() -> {
+            employeService.calculPerformanceCommercial("C12345", -100l, 10000l);
+        }).isInstanceOf(EmployeException.class).hasMessage("Le chiffre d'affaire traité ne peut être négatif ou null !");
+    }
+
+    @Test
+    public void testCalculPerformanceCommercialWithBadObjectifCa() {
+        Assertions.assertThatThrownBy(() -> {
+            employeService.calculPerformanceCommercial("C12345", 10000l, -100l);
+        }).isInstanceOf(EmployeException.class).hasMessage("L'objectif de chiffre d'affaire ne peut être négatif ou null !");
+    }
+
 }
