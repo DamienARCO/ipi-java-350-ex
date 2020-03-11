@@ -35,7 +35,7 @@ public class EmployeService {
      * @throws EmployeException Si on arrive au bout des matricules possibles
      * @throws EntityExistsException Si le matricule correspond à un employé existant
      */
-    public void embaucheEmploye(String nom, String prenom, Poste poste, NiveauEtude niveauEtude, Double tempsPartiel) throws EmployeException, EntityExistsException {
+    public void embaucheEmploye(String nom, String prenom, Poste poste, NiveauEtude niveauEtude, Double tempsPartiel) throws EmployeException {
 
         //Récupération du type d'employé à partir du poste
         String typeEmploye = poste.name().substring(0,1);
@@ -106,12 +106,12 @@ public class EmployeService {
      * @throws EmployeException Si le chiffre d'affaire traité ne peut être négatif ou null
      * @throws EntityNotFoundException Si le matricule n'existe pas
      */
-    public void calculPerformanceCommercial(String matricule, Long caTraite, Long objectifCa) throws EmployeException {
+    public void calculPerformanceCommercial(String matricule, long caTraite, long objectifCa) throws EmployeException {
         //Vérification des paramètres d'entrée
-        if(caTraite == null || caTraite < 0){
+        if(caTraite < 0){
             throw new EmployeException("Le chiffre d'affaire traité ne peut être négatif ou null !");
         }
-        if(objectifCa == null || objectifCa < 0){
+        if(objectifCa < 0){
             throw new EmployeException("L'objectif de chiffre d'affaire ne peut être négatif ou null !");
         }
         if(matricule == null || !matricule.startsWith("C")){
