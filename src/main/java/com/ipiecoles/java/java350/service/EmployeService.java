@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityExistsException;
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 
 @Service
@@ -36,11 +37,6 @@ public class EmployeService {
      */
     public void embaucheEmploye(String nom, String prenom, Poste poste, NiveauEtude niveauEtude, Double tempsPartiel) throws EmployeException, EntityExistsException {
 
-        logger.debug("A DEBUG Message");
-        logger.info("An INFO Message");
-        logger.warn("A WARN Message");
-        logger.error("An ERROR Message");
-
         //Récupération du type d'employé à partir du poste
         String typeEmploye = poste.name().substring(0,1);
 
@@ -64,7 +60,7 @@ public class EmployeService {
 
         //On vérifie l'existence d'un employé avec ce matricule
         if(employeRepository.findByMatricule(matricule) != null){
-            logger.error("L'employé de matricule " + matricule + " existe déjà en BDD");
+            logger.error("L'employé de matricule {} existe déjà en BDD", matricule);
             throw new EntityExistsException("L'employé de matricule " + matricule + " existe déjà en BDD");
         }
 
@@ -78,9 +74,13 @@ public class EmployeService {
         //Création et sauvegarde en BDD de l'employé.
         Employe employe = new Employe(nom, prenom, matricule, LocalDate.now(), salaire, Entreprise.PERFORMANCE_BASE, tempsPartiel);
 
-        logger.debug("Avant Sauvegarde : {}", employe.toString());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Avant Sauvegarde : {}", employe);
+        }
         employeRepository.save(employe);
-        logger.info("Après Sauvegarde : {}", employe.toString());
+        if (logger.isInfoEnabled()){
+            logger.info("Après Sauvegarde : {}", employe);
+        }
 
     }
 
@@ -102,6 +102,9 @@ public class EmployeService {
      * @param objectifCa l'object de chiffre d'affaire qui lui a été fixé
      *
      * @throws EmployeException Si le matricule est null ou ne commence pas par un C
+     * @throws EmployeException Si l'objectif de chiffre d'affaire ne peut être négatif ou null
+     * @throws EmployeException Si le chiffre d'affaire traité ne peut être négatif ou null
+     * @throws EntityNotFoundException Si le matricule n'existe pas
      */
     public void calculPerformanceCommercial(String matricule, Long caTraite, Long objectifCa) throws EmployeException {
         //Vérification des paramètres d'entrée
@@ -117,7 +120,7 @@ public class EmployeService {
         //Recherche de l'employé dans la base
         Employe employe = employeRepository.findByMatricule(matricule);
         if(employe == null){
-            throw new EmployeException("Le matricule " + matricule + " n'existe pas !");
+            throw new EntityNotFoundException("Le matricule " + matricule + " n'existe pas !");
         }
 
         Integer performance = Entreprise.PERFORMANCE_BASE;
