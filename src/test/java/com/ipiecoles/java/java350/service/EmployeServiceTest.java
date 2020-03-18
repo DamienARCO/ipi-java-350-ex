@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +28,8 @@ public class EmployeServiceTest {
     private EmployeService employeService;
     @Mock
     private EmployeRepository employeRepository;
+
+    /* ------------------------------ TEST embaucheEmploye ------------------------------ */
 
     @ParameterizedTest(name = "Le {2} {1} {0} de niveau {3} de matricule {6} " +
             "a été embauché à temps plein pour un salaire de {7} €")
@@ -77,6 +80,26 @@ public class EmployeServiceTest {
             employeService.embaucheEmploye(nom, prenom, poste, niveauEtude, tempsPartiel);
         }).isInstanceOf(EmployeException.class).hasMessage("Limite des 100000 matricules atteinte !");
     }
+
+    @Test
+    public void testEmbaucheEmployeWithEmployeExist() {
+        //Given
+        String nom = "Doe";
+        String prenom = "John";
+        Poste poste = Poste.COMMERCIAL;
+        NiveauEtude niveauEtude = NiveauEtude.BTS_IUT;
+        Double tempsPartiel = 1.0;
+        Employe employe = new Employe();
+        employe.setNom(nom);
+        Mockito.when(employeRepository.findLastMatricule()).thenReturn("12345");
+        Mockito.when(employeRepository.findByMatricule("C12346")).thenReturn(employe);
+
+        Assertions.assertThatThrownBy(() -> {
+            employeService.embaucheEmploye(nom, prenom, poste, niveauEtude, tempsPartiel);
+        }).isInstanceOf(EntityExistsException.class).hasMessage("L'employé de matricule C12346 existe déjà en BDD");
+    }
+
+    /* ------------------------------ TEST calculPerforemanceCommercial ------------------------------ */
 
     @ParameterizedTest
     @CsvSource({
