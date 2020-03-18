@@ -1,8 +1,6 @@
-package com.ipiecoles.java.java350.service;
+package com.ipiecoles.java.java350.repository;
 
-import com.ipiecoles.java.java350.exception.EmployeException;
 import com.ipiecoles.java.java350.model.Employe;
-import com.ipiecoles.java.java350.repository.EmployeRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,12 +11,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-public class EmployeServiceIntegrationTest {
+public class EmployeRepositoryIntegrationTest {
     @Autowired
     private EmployeRepository employeRepository;
-
-    @Autowired
-    private EmployeService employeService;
 
     @BeforeEach
     public void setup() {
@@ -26,8 +21,7 @@ public class EmployeServiceIntegrationTest {
     }
 
     @Test
-    public void testCalculPerformanceCommercial() throws EmployeException {
-        //Given
+    public void testAvgPerformanceWhereMatriculeStartsWith() {
         Employe employe1 = new Employe();
         employe1.setMatricule("C12345");
         employe1.setPerformance(1);
@@ -44,23 +38,18 @@ public class EmployeServiceIntegrationTest {
         employe4.setMatricule("C98765");
         employe4.setPerformance(5);
 
+        Employe employe5 = new Employe();
+        employe5.setMatricule("T87654");
+        employe5.setPerformance(5);
+
         employeRepository.save(employe1);
         employeRepository.save(employe2);
         employeRepository.save(employe3);
         employeRepository.save(employe4);
+        employeRepository.save(employe5);
 
-        // employe test et jeux de test
-        String matricule = employe3.getMatricule();
-        long caTraite = 11000l;
-        long objectifCa = 10000l;
+        Double avg = employeRepository.avgPerformanceWhereMatriculeStartsWith("C");
 
-        //When
-        employeService.calculPerformanceCommercial(matricule, caTraite, objectifCa);
-
-        //Then
-        Employe employeAfter = employeRepository.findByMatricule(matricule);
-        //CaTraité est entre 5% et 20% par rapport à l'objectif et performance calculée > moyenne (2.75) => performance = 3+1+1
-        Assertions.assertThat(employeAfter.getPerformance()).isEqualTo(5);
+        Assertions.assertThat(avg).isEqualTo(2.75);
     }
-
 }
