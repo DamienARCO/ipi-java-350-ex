@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -65,7 +66,7 @@ public class EmployeServiceTest {
     public void testEmbaucheEmployeLimiteMatricule() {
         //Given
         String nom = "Doe";
-        String prenom ="John";
+        String prenom = "John";
         Poste poste = Poste.COMMERCIAL;
         NiveauEtude niveauEtude = NiveauEtude.BTS_IUT;
         Double tempsPartiel = 1.0;
@@ -75,17 +76,6 @@ public class EmployeServiceTest {
         Assertions.assertThatThrownBy(() -> {
             employeService.embaucheEmploye(nom, prenom, poste, niveauEtude, tempsPartiel);
         }).isInstanceOf(EmployeException.class).hasMessage("Limite des 100000 matricules atteinte !");
-
-        /* plus basique
-        try {
-            employeService.embaucheEmploye(nom, prenom, poste, niveauEtude, tempsPartiel);
-            // Si aucune exception est levée
-            Assertions.fail("Aurait dû planter !");
-        } catch (Exception e) {
-            Assertions.assertThat(e).isInstanceOf(EmployeException.class);
-            Assertions.assertThat(e.getMessage()).isEqualTo("Limite des 100000 matricules atteinte !");
-        }
-         */
     }
 
     @ParameterizedTest
@@ -123,30 +113,39 @@ public class EmployeServiceTest {
     }
 
     @Test
-    public void testCalculPerformanceCommercialWithMatriculeNull() throws EmployeException {
+    public void testCalculPerformanceCommercialWithFinByMatriculeNull() {
+        Mockito.when(employeRepository.findByMatricule("C12345")).thenReturn(null);
+
         Assertions.assertThatThrownBy(() -> {
-            employeService.calculPerformanceCommercial(null, 10000l, 10000l);
+            employeService.calculPerformanceCommercial("C12345", 10000L, 10000L);
+        }).isInstanceOf(EntityNotFoundException.class).hasMessage("Le matricule C12345 n'existe pas !");
+    }
+
+    @Test
+    public void testCalculPerformanceCommercialWithMatriculeNull() {
+        Assertions.assertThatThrownBy(() -> {
+            employeService.calculPerformanceCommercial(null, 10000L, 10000L);
         }).isInstanceOf(EmployeException.class).hasMessage("Le matricule ne peut être null et doit commencer par un C !");
     }
 
     @Test
-    public void testCalculPerformanceCommercialWithBadMatricule() throws EmployeException {
+    public void testCalculPerformanceCommercialWithBadMatricule() {
         Assertions.assertThatThrownBy(() -> {
-            employeService.calculPerformanceCommercial("T12345", 10000l, 10000l);
+            employeService.calculPerformanceCommercial("T12345", 10000L, 10000L);
         }).isInstanceOf(EmployeException.class).hasMessage("Le matricule ne peut être null et doit commencer par un C !");
     }
 
     @Test
     public void testCalculPerformanceCommercialWithBadCaTraite() {
         Assertions.assertThatThrownBy(() -> {
-            employeService.calculPerformanceCommercial("C12345", -100l, 10000l);
+            employeService.calculPerformanceCommercial("C12345", -100L, 10000L);
         }).isInstanceOf(EmployeException.class).hasMessage("Le chiffre d'affaire traité ne peut être négatif ou null !");
     }
 
     @Test
     public void testCalculPerformanceCommercialWithBadObjectifCa() {
         Assertions.assertThatThrownBy(() -> {
-            employeService.calculPerformanceCommercial("C12345", 10000l, -100l);
+            employeService.calculPerformanceCommercial("C12345", 10000L, -100L);
         }).isInstanceOf(EmployeException.class).hasMessage("L'objectif de chiffre d'affaire ne peut être négatif ou null !");
     }
 
