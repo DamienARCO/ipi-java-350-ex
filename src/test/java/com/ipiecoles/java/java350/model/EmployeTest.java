@@ -10,6 +10,9 @@ import java.time.LocalDate;
 
 public class EmployeTest {
 
+    /* ------------------------------ TEST getAnneeEmbauche ------------------------------ */
+
+
     // dateEmbauche avec date 2 ans avant aujourd'hui =>  2 années d'ancienneté
     @Test
     public void testGetAnneeEmbaucheMoinsDeuxAns() {
@@ -66,6 +69,8 @@ public class EmployeTest {
         Assertions.assertThat(nbAnnees).isEqualTo(0);
     }
 
+    /* ------------------------------ TEST getPrimeAnnuelle ------------------------------ */
+
     @ParameterizedTest(name = "Le matricule {0} avec une performance de {1}, une ancienneté de {2} ans " +
             "à temps partiel de {3} obtient une prime annuelle de {4}")
     @CsvSource({
@@ -89,6 +94,8 @@ public class EmployeTest {
         // When Then
         Assertions.assertThat(employe.getPrimeAnnuelle()).isEqualTo(prime);
     }
+
+    /* ------------------------------ TEST augmenterSalaire ------------------------------ */
 
     @ParameterizedTest(name = "Un salaire de {0}€ augmenté de {1} vaut {2}€")
     @CsvSource({
@@ -120,5 +127,27 @@ public class EmployeTest {
         Assertions.assertThatThrownBy(() -> {
             employe.augmenterSalaire(-0.1);
         }).isInstanceOf(EmployeException.class).hasMessage("Le pourcentage d'augmentation ne peut pas être négatif !");
+    }
+
+    /* ------------------------------ TEST getNbRtt ------------------------------ */
+
+    @ParameterizedTest(name = "En {0}, le cadre au taux d activité de {1} aura {2} jours de repos.")
+    @CsvSource({
+            "2019, 1.0, 8",
+            "2019, 0.5, 4",
+            "2021, 1.0, 11",
+            "2022, 1.0, 10",
+            "2028, 1.0, 8",
+            "2032, 1.0, 12",
+            "2033, 1.0, 10",
+            "2034, 1.0, 8"
+    })
+    public void testGetNbRtt(Integer date, Double tpsPartiel, Integer nbRtt) {
+        Employe employe = new Employe();
+        employe.setTempsPartiel(tpsPartiel);
+
+        Integer res = employe.getNbRtt(LocalDate.of(date, 1, 1));
+
+        Assertions.assertThat(res).isEqualTo(nbRtt);
     }
 }

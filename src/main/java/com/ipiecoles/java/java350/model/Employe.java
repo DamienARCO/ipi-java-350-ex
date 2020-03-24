@@ -60,16 +60,43 @@ public class Employe {
         return getNbRtt(LocalDate.now());
     }
 
+    /**
+     * Calcul du nombre de jours RTT de repos dans l'année, au prorate du taux d'activité
+     * 
+     * @param d la date
+     * @return Le nombre de jours RTT que peut avoir un cadre cette année-là
+     */
     public Integer getNbRtt(LocalDate d){
-        int i1 = d.isLeapYear() ? 365 : 366;
-        int var = 104;
-        switch (LocalDate.of(d.getYear(),1,1).getDayOfWeek()){
-            case THURSDAY: if(d.isLeapYear()) var =  var + 1; break;
-            case FRIDAY: if(d.isLeapYear()) var =  var + 2; else var =  var + 1; break;
-            case SATURDAY: var = var + 1; break;
+        int joursAnnee = d.isLeapYear() ? 366 : 365;
+        // les Samedis et Dimanches
+        int joursNonTravailles = 104;
+
+        DayOfWeek premierJourAnnee = LocalDate.of(d.getYear(),1,1).getDayOfWeek();
+
+        if (d.isLeapYear()) {
+            switch (premierJourAnnee) {
+                case FRIDAY:
+                    joursNonTravailles =  joursNonTravailles + 1;
+                    break;
+                case SATURDAY:
+                    joursNonTravailles =  joursNonTravailles + 2;
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            switch (premierJourAnnee) {
+                case SATURDAY:
+                case SUNDAY:
+                    joursNonTravailles =  joursNonTravailles + 1;
+                    break;
+                default:
+                    break;
+            }
         }
-        int monInt = (int) Entreprise.joursFeries(d).stream().filter(localDate -> localDate.getDayOfWeek().getValue() <= DayOfWeek.FRIDAY.getValue()).count();
-        return (int) Math.ceil((i1 - Entreprise.NB_JOURS_MAX_FORFAIT - var - Entreprise.NB_CONGES_BASE - monInt) * tempsPartiel);
+
+        int joursFeries = (int) Entreprise.joursFeries(d).stream().filter(localDate -> localDate.getDayOfWeek().getValue() <= DayOfWeek.FRIDAY.getValue()).count();
+        return (int) Math.ceil((joursAnnee - Entreprise.NB_JOURS_MAX_FORFAIT - joursNonTravailles - Entreprise.NB_CONGES_BASE - joursFeries) * tempsPartiel);
     }
 
     /**
