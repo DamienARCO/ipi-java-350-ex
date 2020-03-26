@@ -3,7 +3,6 @@ package com.ipiecoles.java.java350.repository;
 
 import com.ipiecoles.java.java350.model.Employe;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
