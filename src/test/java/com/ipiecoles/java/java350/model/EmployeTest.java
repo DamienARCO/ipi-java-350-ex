@@ -105,7 +105,7 @@ public class EmployeTest {
             "1000, 1, 2000",
             "0, 1, 0",
     })
-    public void testAugmenterSalaire(Double salaire, Double pourcentage, Double salaireAugmentée) throws EmployeException {
+    public void testAugmenterSalaire(Double salaire, Double pourcentage, Double salaireAugmentee) throws EmployeException {
         //Given
         Employe employe = new Employe();
         employe.setSalaire(salaire);
@@ -114,7 +114,7 @@ public class EmployeTest {
         employe.augmenterSalaire(pourcentage);
 
         //Then
-        Assertions.assertThat(employe.getSalaire()).isEqualTo(salaireAugmentée);
+        Assertions.assertThat(employe.getSalaire()).isEqualTo(salaireAugmentee);
     }
 
     @Test
